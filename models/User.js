@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt"); // 비밀번호 암호화 해주는 패키지
+const saltRounds = 10;
 
 const userSchema = mongoose.Schema({
   name: {
@@ -36,6 +38,24 @@ const userSchema = mongoose.Schema({
   },
 });
 
-const User = mongoose.model('User', userSchema)
+userSchema.pre("save", function (next) {
+  // index.js 에서 user.save를 하기전에 이 함수 시작
+  let user = this;
 
-module.exports={User}
+  if (user.isModified("password")) {
+    // 비밀번호를 암호화 시킨다.
+    bcrypt.genSalt(saltRounds, function (err, salt) {
+      if (err) return next(err);
+
+      bcrypt.hash(user.password, salt, function (err, hash) {
+        if (err) return next(err);
+        user.password = hash;
+        next();
+      });
+    });
+  }
+});
+
+const User = mongoose.model("User", userSchema);
+
+module.exports = { User };
