@@ -1,6 +1,10 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { withRouter } from "react-router-dom";
+import { loginUser } from "../../../_actions/user_action";
 
-const LoginPage = () => {
+const LoginPage = (props) => {
+  const dispatch = useDispatch();
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -13,8 +17,25 @@ const LoginPage = () => {
     };
     setForm(nextForm);
   };
-
   const { email, password } = form;
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+
+    let body = {
+      email,
+      password,
+    };
+
+    dispatch(loginUser(body))
+    .then(response => {
+        if (response.payload.loginSuccess) {
+            props.history.push('/')
+        } else {
+            alert('Error˝')
+        }
+    })
+  };
 
   return (
     <div
@@ -26,7 +47,11 @@ const LoginPage = () => {
         height: "100vh",
       }}
     >
-      <form action="" style={{ display: "flex", flexDirection: "column" }}>
+      <form
+        action=""
+        style={{ display: "flex", flexDirection: "column" }}
+        onSubmit={onSubmit}
+      >
         <label>Email</label>
         <input
           type="email"
@@ -50,4 +75,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default withRouter(LoginPage)
